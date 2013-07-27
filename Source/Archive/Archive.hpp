@@ -13,6 +13,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 //Allow Windows to use 8/16/32 byte values
 #if defined(_WIN32)
@@ -30,6 +31,10 @@ public:
     WarArchive();
     ~WarArchive();
     void LoadArchive(const std::string &filePath);
+    void LoadArchive(std::vector<char> *loadedFile);
+    void ExtractEntity(const std::string &outFilePath, unsigned int entityNumber);
+    void ExtractEntity(std::vector<char> *uncompressedFile, unsigned int entityNumber);
+    void CloseArchive();
     
     
 protected:
@@ -42,7 +47,7 @@ protected:
     std::vector<uint32_t> *fileOffsets;
     
     //War archive header information
-    uint16_t numberOfFiles;
+    uint16_t numberOfEntities;
     uint32_t magicNumber;
     
     //Unknown objects
