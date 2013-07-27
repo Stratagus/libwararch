@@ -38,6 +38,13 @@ set(LIBWARARCH_SOURCE
 	${SOURCE_DIR}/Exceptions/WarArchException.cpp
    )
 
+set(LIBWARARCH_ARCHIVE_SOURCE
+	${SOURCE_DIR}/Archive/Archive.hpp
+	${SOURCE_DIR}/Archive/Archive.cpp
+	${SOURCE_DIR}/Exceptions/ArchiveException/ArchiveException.hpp
+	${SOURCE_DIR}/Exceptions/ArchiveException/ArchiveException.cpp
+)
+
 set(LIBWARARCH_UNITTEST_SOURCE
 	${UNITTEST_DIR}/main.hpp
 	${UNITTEST_DIR}/main.cpp
@@ -53,6 +60,7 @@ set(SAMPLES_EXTRACTFILE_SOURCE
 #allow for easy navigation through the code base for novice and
 #heavy contributors.
 source_group(Main FILES ${LIBWARARCH_SOURCE})
+source_group(Archive FILES ${LIBWARARCH_ARCHIVE_SOURCE})
 
 if(RPATH)
 # use, i.e. don't skip the full RPATH for the build tree
@@ -76,7 +84,7 @@ IF("${isSystemDir}" STREQUAL "-1")
 ENDIF("${isSystemDir}" STREQUAL "-1")
 endif()
 
-add_library(wararch SHARED ${LIBWARARCH_SOURCE})
+add_library(wararch SHARED ${LIBWARARCH_SOURCE} ${LIBWARARCH_ARCHIVE_SOURCE})
 
 if(APPLE)
 
