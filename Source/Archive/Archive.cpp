@@ -64,11 +64,13 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
     if(entityNumber > numberOfEntities)
     {
         //throw out of bounds error
+        throw "bad";
 #warning throw here
     }
     
     //unknown
     int flags;
+    int dp = 0;
     
     std::ofstream outFile;
     outFile.open(outFilePath.c_str(), std::ios::binary);
@@ -77,36 +79,37 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
     currentArchiveFileStream->seekg(fileOffsets->at(entityNumber));
     
     int unCompressedFileLength;
-    currentArchiveFileStream->read((char *) &unCompressedFileLength, 3);
+    currentArchiveFileStream->read((char *) &unCompressedFileLength, 4);
     
-    //??
-#warning - 1 is a hack
-    flags = (unCompressedFileLength >> 10) - 1;
+    flags = (unCompressedFileLength >> 24);
     unCompressedFileLength &= 0x00FFFFFF;
+    
+    std::vector<uint8_t> output;
+    output.resize(unCompressedFileLength);
     
     //The data is compressed
     if(flags == 0x20)
     {
         uint8_t ep;
         int bi = 0;
+        unsigned char buf[409600];
         
         for(int currentCompressedByte = 0; currentCompressedByte < unCompressedFileLength;)
         {
-            uint16_t bflags;
+            int i;
+            int bflags;
             
             currentArchiveFileStream->read((char *) &bflags, 1);
-            std::cout << "Bflags " << (int) bflags << '\n';
-            
-            for(int currentUncompressedByte = 0; currentUncompressedByte < 8;)
+            for(int i= 0; i < 8; ++i)
             {
-                uint8_t j;
+                int j;
                 int o;
                 
                 if(bflags & 1)
                 {
                     currentArchiveFileStream->read((char *) &j, 1);
-                    outFile.write((char *) &j, 1);
-                    
+                    output.at(dp++) = j;
+                    buf[bi++ & 0xFFF] = j;
                     
                 }
                 else
@@ -114,24 +117,21 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
                     currentArchiveFileStream->read((char *) &o, 2);
                     j = (o >> 12) + 3;
                     o &= 0xFFF;
+                    while (j--)
+                    {
+                        buf[bi++ & 0xFFF] = output.at(dp++) = buf[o++ & 0xFFF];
+                        if(dp == unCompressedFileLength)
+                        {
+                            break;
+                        }
+                    }
                 }
-                bflags >>= 1;
+                
             }
         }
         
     }
-    //The data is uncompressed
-    else if(flags == 0x00)
-    {
-        currentArchiveFileStream->read((char *) &outFile, unCompressedFileLength);
-    }
-    //Problem we don't know what the flag means : |
-    else
-    {
-        //throw error
-    #warning throw error
-        throw "fail";
-    }
+
     outFile.close();
 
 }
