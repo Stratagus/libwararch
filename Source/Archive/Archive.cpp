@@ -104,7 +104,7 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
             uint8_t bflags;
             //std::cout << "B Flags: " << (int) bflags << " Next value :" << (int) currentArchiveFileStream->peek() << '\n';
             currentArchiveFileStream->read((char *) &bflags, 1);
-            //std::cout << "B Flags: " << (int) bflags << " Next value :" << (int) currentArchiveFileStream->peek() << '\n';
+            std::cout << "B Flags: " << (int) bflags << " Next value :" << (int) currentArchiveFileStream->peek() << '\n';
             for(int i= 0; i < 8; ++i)
             {
                 uint8_t j;
@@ -113,7 +113,7 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
                 if(bflags & 1)
                 {
                     currentArchiveFileStream->read((char *) &j, 1);
-                   // std::cout << "J: " << (int) j << '\n';
+                    std::cout << "J: " << (int) j << '\n';
                     outFile.write((char *) &j, 1);
                     buffer[byteIndex++ & 0xFFF] = j;
                     bytesProcessed++;
@@ -123,15 +123,15 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
                 else
                 {
                     currentArchiveFileStream->read((char *) &o, 2);
-                    std::cout << "O Value: " << (int) o << '\n';
+                    //std::cout << "O Value: " << (int) o << '\n';
                     j = (o >> 12) + 3;
                     std::cout << "J Value: " << (int) j << '\n';
                     o &= 0xFFF;
                     while (j--)
                     {
-                        std::cout << "buffer[o & 0xFFF]: " << (int) buffer[o++ & 0xFFF];
-                        outFile.write((char *) &buffer[o & 0xFFF], 1);
-                        buffer[byteIndex++ & 0xFFF] = buffer[o & 0xFFF];
+                        std::cout << "Accessing: byteindex " << ((byteIndex + 1) & 0xFFF) << " o " << ((o + 1) & 0xFFF)<< " buffer[o & 0xFFF]: " << (int) buffer[(o + 1) & 0xFFF] << '\n';
+                        outFile.write((char *) &buffer[(o + 1) & 0xFFF], 1);
+                        buffer.at(byteIndex++ & 0xFFF) = buffer.at(o++ & 0xFFF);
                         bytesProcessed++;
                         
                         if(bytesProcessed  == unCompressedFileLength)
@@ -160,6 +160,7 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
     {
         throw "problem";
     }
+    
     
     //outFile.write((char *) &output, output.size());
     
