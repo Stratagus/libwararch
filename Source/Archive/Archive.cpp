@@ -116,7 +116,9 @@ void WarArchive::ExtractEntity(std::string outFilePath, unsigned int entityNumbe
                     std::cout << "J: " << (int) j << '\n';
                     std::cout << "Going to write: " << (char) j << '\n';
                     outFile.write((char *) &j, 1);
-                    buffer[byteIndex++ & 0xFFF] = j;
+                    byteIndex &= 0xFFF;
+                    buffer[byteIndex] = j;
+                    byteIndex++;
                     bytesProcessed++;
                     //std::cout << "Changed value of buffer to: " << (int) buffer[byteIndex & 0xFFF] << '\n';
                     
