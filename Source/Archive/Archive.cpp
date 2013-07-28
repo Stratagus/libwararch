@@ -81,8 +81,6 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
     unsigned int flags;
     int bytesProcessed = 0;
     
-    unsigned char *dp = NULL;
-    unsigned char *start = NULL;
     
     currentArchiveFileStream->seekg(fileOffsets->at(entityNumber));
     
@@ -92,8 +90,6 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
     flags = (unCompressedFileLength >> 24);
     unCompressedFileLength &= 0x00FFFFFF;
     outFileTest.resize(unCompressedFileLength);
-    
-    start = dp = new unsigned char[unCompressedFileLength];
     
     std::vector<uint8_t> buffer;
     //The data is compressed
@@ -123,7 +119,6 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
                     currentArchiveFileStream->read((char *) &j, 1);
                     std::cout << "J: " << (int) j << '\n';
                     outFile.write((char *) &j, 1);
-                    *dp++ = j;
                     buffer[byteIndex++ & 0xFFF] = j;
                     bytesProcessed++;
                     //std::cout << "Changed value of buffer to: " << (int) buffer[byteIndex & 0xFFF] << '\n';
@@ -139,7 +134,6 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
                     while (j--)
                     {
                         std::cout << "Accessing: byteindex " << ((byteIndex + 1) & 0xFFF) << " o " << ((o + 1) & 0xFFF)<< " buffer[o & 0xFFF]: " << (int) buffer[(o + 1) & 0xFFF] << '\n';
-                        *dp++ = buffer[(o + 1) & 0xFFF];
                         outFile.write((char *) &buffer[(o + 1) & 0xFFF], 1);
                         buffer.at(byteIndex++ & 0xFFF) = buffer.at(o++ & 0xFFF);
                         bytesProcessed++;
@@ -163,24 +157,19 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
     }
     else if(flags == 0x00)
     {
-        //outFile.write((char *) , <#streamsize __n#>)
-        currentArchiveFileStream->read((char *) &outFile, unCompressedFileLength);
+        //Would like to use std::copy
+        uint8_t buffer;
+        for(int processByte = 0; processByte < unCompressedFileLength; processByte++)
+        {
+            currentArchiveFileStream->read((char *) &buffer, 1);
+            outFile.write((char *) &buffer, 1);
+        }
     }
     else
     {
         throw "problem";
     }
-    
-    
-    //outFile.write((char *) &output, output.size());
-    
-    //for(int checker = 0; checker < unCompressedFileLength; checker++)
-    //{
-    //    outFile.write((char *) output.at(checker), 1);
-    //}
-    FILE *test = fopen("outC", "wb");
-    fwrite(start, sizeof(char), unCompressedFileLength, test);
-    fclose(test);
+
     outFile.close();
 
 }
