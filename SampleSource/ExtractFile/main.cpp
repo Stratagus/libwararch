@@ -25,7 +25,7 @@ int main()
 {
     WarArchive myArchive;
     myArchive.LoadArchive("/Users/brad/Desktop/war1/DATA/DATA.WAR");
-    myArchive.ExtractEntity("out", 472);
+    myArchive.ExtractEntity("out.xmi", 472);
     myArchive.CloseArchive();
 
     //std::vector<char> *imageData = new std::vector<char>;
