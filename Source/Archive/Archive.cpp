@@ -59,13 +59,13 @@ void WarArchive::LoadArchive(std::vector<char> *loadedFile)
     //war->op[i] = war->data + war->filesize;
 }
 
-void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int entityNumber)
+void WarArchive::ExtractEntity(std::string outFilePath, unsigned int entityNumber)
 {
     if(entityNumber > numberOfEntities)
     {
         //throw out of bounds error
         throw "bad";
-    #warning throw here
+#warning throw here
     }
     
     //Open an output file
@@ -73,13 +73,9 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
     outFile.open(outFilePath.c_str(), std::ios::binary);
     outFile.exceptions(std::ofstream::failbit);
     
-    std::vector<uint8_t> outFileTest;
-    std::vector<uint8_t>::iterator currentPosition;
-    
     
     //unknown
     unsigned int flags;
-    int bytesProcessed = 0;
     
     
     currentArchiveFileStream->seekg(fileOffsets->at(entityNumber));
@@ -89,7 +85,6 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
     
     flags = (unCompressedFileLength >> 24);
     unCompressedFileLength &= 0x00FFFFFF;
-    outFileTest.resize(unCompressedFileLength);
     
     std::vector<uint8_t> buffer;
     //The data is compressed
@@ -103,13 +98,14 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
         int byteIndex = 0;
         
         
-        while(bytesProcessed < unCompressedFileLength)
+        for(int bytesProcessed= 0; bytesProcessed < unCompressedFileLength; bytesProcessed++)
         {
             uint8_t bflags;
             //std::cout << "B Flags: " << (int) bflags << " Next value :" << (int) currentArchiveFileStream->peek() << '\n';
             currentArchiveFileStream->read((char *) &bflags, 1);
             std::cout << "B Flags: " << (int) bflags << " Next value :" << (int) currentArchiveFileStream->peek() << '\n';
-            for(int i= 0; i < 8; ++i)
+            
+            for(int i = 0; i < 8; ++i)
             {
                 uint8_t j;
                 uint16_t o;
@@ -118,6 +114,7 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
                 {
                     currentArchiveFileStream->read((char *) &j, 1);
                     std::cout << "J: " << (int) j << '\n';
+                    std::cout << "Going to write: " << (char) j << '\n';
                     outFile.write((char *) &j, 1);
                     buffer[byteIndex++ & 0xFFF] = j;
                     bytesProcessed++;
@@ -133,11 +130,20 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
                     o &= 0xFFF;
                     while (j--)
                     {
-                        std::cout << "Accessing: byteindex " << ((byteIndex + 1) & 0xFFF) << " o " << ((o + 1) & 0xFFF)<< " buffer[o & 0xFFF]: " << (int) buffer[(o + 1) & 0xFFF] << '\n';
-                        outFile.write((char *) &buffer[(o + 1) & 0xFFF], 1);
-                        buffer.at(byteIndex++ & 0xFFF) = buffer.at(o++ & 0xFFF);
-                        bytesProcessed++;
+
+                        //std::cout << "Accessing: byteindex " << ((byteIndex + 1) & 0xFFF) << " o " << ((o + 1) & 0xFFF)<< " buffer[o & 0xFFF]: " << (int) buffer[(o + 1) & 0xFFF] << '\n';
                         
+                        //Why does this not work as
+                        
+                        o &= 0xFFF;
+                        byteIndex &= 0xFFF;
+                        outFile.write((char *) &buffer.at(o), 1);
+                        buffer.at(byteIndex) =  (buffer.at(o));
+                        o++;
+                        byteIndex++;
+                        //std::cout << "Going to write: " << buffer.at(byteIndex & 0xFFF) << '\n';
+                        
+                        bytesProcessed++;
                         if(bytesProcessed  == unCompressedFileLength)
                         {
                             break;
@@ -169,7 +175,7 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
     {
         throw "problem";
     }
-
+    
     outFile.close();
 
 }

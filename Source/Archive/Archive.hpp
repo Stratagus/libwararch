@@ -10,6 +10,8 @@
  *  \copyright LGPLv2
  */
 
+#include "../Exceptions/ArchiveException/ArchiveException.hpp"
+
 #include <fstream>
 #include <string>
 #include <vector>
@@ -32,8 +34,7 @@ public:
     ~WarArchive();
     void LoadArchive(const std::string &filePath);
     void LoadArchive(std::vector<char> *loadedFile);
-    void ExtractEntity(const std::string &outFilePath, unsigned int entityNumber);
-    void ExtractEntity(std::vector<char> *uncompressedFile, unsigned int entityNumber);
+    void ExtractEntity(std::string outFilePath, unsigned int entityNumber);
     void CloseArchive();
     
     
