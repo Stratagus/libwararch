@@ -7,10 +7,10 @@ int main()
     WarArchive myArchive;
     
     //Load a war archive (In my case the Warcraft 1 file DATA.WAR)
-    myArchive.LoadArchive("/Users/brad/Desktop/war1/DATA/DATA.WAR");
+    myArchive.LoadArchive("war1.war");
     
     //The entity is extracted and directly written to disk
-    myArchive.ExtractEntity("out.wav", 472);
+    myArchive.ExtractEntity("out.wav", 473);
     
     //A vector with the uncompressed file can also be extracted
     //for further processing

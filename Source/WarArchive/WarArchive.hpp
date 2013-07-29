@@ -55,7 +55,7 @@ public:
      * \param [in] filepath The full file path to the WAR archive
      * \param [in] multiFile Does the archive contain more then one file
      * \note NA*/
-    void LoadArchive(const std::string &filePath, bool multiFile = true);
+    void LoadArchive(const std::string &filePath);
     
     //!Extracts an entity from the archive to a file
     /*!Extact an entity from a file and save it to outFilePath

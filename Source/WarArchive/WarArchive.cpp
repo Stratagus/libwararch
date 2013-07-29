@@ -13,7 +13,7 @@ WarArchive::~WarArchive()
 {
     CleanArchive();
 }
-void WarArchive::LoadArchive(const std::string &filePath, bool multiFile)
+void WarArchive::LoadArchive(const std::string &filePath)
 {
     CleanArchive();
     #if VERBOSE >= 2
@@ -23,23 +23,14 @@ void WarArchive::LoadArchive(const std::string &filePath, bool multiFile)
     
     currentArchiveFileStream->open(filePath.c_str(), std::ios::binary);
     currentArchiveFileStream->exceptions(std::ifstream::badbit | std::ifstream::failbit | std::ifstream::eofbit);
-    
-    if(multiFile)
-    {
-        //Read in the magic number
-        currentArchiveFileStream->read((char *) &magicNumber, 4);
-        //Read in the number of entities (files) in the archive
-        currentArchiveFileStream->read((char *) &numberOfEntities, 2);
-        //Read in the types
-        currentArchiveFileStream->read((char *) &type, 2);
-    }
-    else
-    {
-        //Read in the magic number
-        currentArchiveFileStream->read((char *) &magicNumber, 4);
-        //Read in the number of entities (files) in the archive
-        currentArchiveFileStream->read((char *) &numberOfEntities, 2);
-    }
+
+    //Read in the magic number
+    currentArchiveFileStream->read((char *) &magicNumber, 4);
+    //Read in the number of entities (files) in the archive
+    currentArchiveFileStream->read((char *) &numberOfEntities, 2);
+    //Read in the types
+    currentArchiveFileStream->read((char *) &type, 2);
+
     #if VERBOSE >= 3
         std::cout << "Magic Number: " << magicNumber << " Number of Entities: " << numberOfEntities << " Type: " << type << '\n';
     #endif
