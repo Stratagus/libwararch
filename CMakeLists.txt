@@ -41,8 +41,8 @@ set(LIBWARARCH_SOURCE
 set(LIBWARARCH_ARCHIVE_SOURCE
 	${SOURCE_DIR}/WarArchive/WarArchive.hpp
 	${SOURCE_DIR}/WarArchive/WarArchive.cpp
-	${SOURCE_DIR}/Exceptions/ArchiveException/ArchiveException.hpp
-	${SOURCE_DIR}/Exceptions/ArchiveException/ArchiveException.cpp
+	${SOURCE_DIR}/Exceptions/WarArchiveException/WarArchiveException.hpp
+	${SOURCE_DIR}/Exceptions/WarArchiveException/WarArchiveException.cpp
 )
 
 set(LIBWARARCH_UNITTEST_SOURCE

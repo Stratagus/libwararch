@@ -10,4 +10,11 @@ typedef uint32_t u_int32_t;
 #else
 #include <inttypes.h>
 #endif
+
+#ifdef __APPLE__
+#define SAMPLEARCHIVE "../../Documentation/SampleContent/SampleArchive.war"
+#else
+#define SAMPLEARCHIVE "../Documentation/SampleContent/SamplePalette.pal"
+#endif
+
 #endif

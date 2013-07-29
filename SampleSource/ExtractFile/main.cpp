@@ -10,7 +10,7 @@ int main()
     myArchive.LoadArchive("/Users/brad/Desktop/war1/DATA/DATA.WAR");
     
     //The entity is extracted and directly written to disk
-    myArchive.ExtractEntity("out.wav", 473);
+    myArchive.ExtractEntity("out.wav", 472);
     
     //A vector with the uncompressed file can also be extracted
     //for further processing

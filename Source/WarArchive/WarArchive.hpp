@@ -12,7 +12,7 @@
  *  \copyright LGPLv2
  */
 
-#include "../Exceptions/ArchiveException/ArchiveException.hpp"
+#include "../Exceptions/WarArchiveException/WarArchiveException.hpp"
 
 #include <fstream>
 #include <string>
@@ -53,8 +53,9 @@ public:
      * \pre filePath must goto a valid WAR Archive
      * \post Opens InputFile stream and loads metadata
      * \param [in] filepath The full file path to the WAR archive
+     * \param [in] multiFile Does the archive contain more then one file
      * \note NA*/
-    void LoadArchive(const std::string &filePath);
+    void LoadArchive(const std::string &filePath, bool multiFile = true);
     
     //!Extracts an entity from the archive to a file
     /*!Extact an entity from a file and save it to outFilePath
