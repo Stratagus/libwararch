@@ -15,13 +15,19 @@ There are three parameters that can be modified.
 1. VERBOSE - The amount of information outputted to the console
  while processing GRP files and ColorPalettes.
  DEFAULT = 0 Range = [1 - 5]
+
  To set add the cmake flag "-DVERBOSE=[DesiredValue]"
-2. UNITTESTS - Compile the Boost Unit tests inluded with libgrp.
+
+2. UNITTESTS - Compile the Boost Unit tests inluded with libwararch.
  This will require that the Boost Library with the Unit Test Framework Module
  be compiled and installed. To enable unit tests
+
  Add the cmake flag "-DUNITTESTS=on"
+
 3. SAMPLECODE - To compile the sample code.
+
  Add the cmake flag "-DSAMPLECODE=on"
+ 
  
 Sample Code
 ===========
