@@ -105,7 +105,7 @@ std::vector<uint8_t> *WarArchive::ExtractEntity(unsigned int entityNumber)
         int byteIndex = 0;
         unsigned int currentWritePosition = 0;
         
-        for(int currentProcessingByte = 0; currentProcessingByte < unCompressedFileLength; currentProcessingByte++)
+        for(int currentProcessingByte = 0; currentProcessingByte < unCompressedFileLength;)
         {
             //The type of data in a specific byte
             uint8_t byteFlags;
