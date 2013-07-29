@@ -24,7 +24,7 @@ int main()
     doorOpenSoundData = NULL;
     
     //Close the WAR archive and delete internal data structures
-    myArchive.CloseArchive();
+    myArchive.CleanArchive();
     
     return 0;
 }

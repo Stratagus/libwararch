@@ -39,8 +39,8 @@ set(LIBWARARCH_SOURCE
    )
 
 set(LIBWARARCH_ARCHIVE_SOURCE
-	${SOURCE_DIR}/Archive/Archive.hpp
-	${SOURCE_DIR}/Archive/Archive.cpp
+	${SOURCE_DIR}/WarArchive/WarArchive.hpp
+	${SOURCE_DIR}/WarArchive/WarArchive.cpp
 	${SOURCE_DIR}/Exceptions/ArchiveException/ArchiveException.hpp
 	${SOURCE_DIR}/Exceptions/ArchiveException/ArchiveException.cpp
 )

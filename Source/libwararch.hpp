@@ -39,7 +39,7 @@
  *  2. Pali Rohar
  *      @ https://launchpad.net/~pali
  */
-#include "Archive/Archive.hpp"
+#include "WarArchive/WarArchive.hpp"
 
 
 #endif

@@ -1,4 +1,4 @@
-#include "Archive.hpp"
+#include "WarArchive.hpp"
 #if VERBOSE
     #include <iostream>
 #endif
@@ -220,10 +220,6 @@ void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int enti
     outFile.write((char *) &unCompressedFile->front(), unCompressedFile->size());
     
     outFile.close();
-}
-void ExtractEntity(std::vector<char> *uncompressedFile, unsigned int entityNumber)
-{
-    
 }
 
 void WarArchive::CloseArchive()
