@@ -34,6 +34,10 @@
  *
  *  Special Thanks
  *  ==============
+ *  1. Patrick Wyatt
+ *      @ http://www.codeofhonor.com/blog/
+ *  2. Pali Rohar
+ *      @ https://launchpad.net/~pali
  */
 #include "Archive/Archive.hpp"
 

@@ -15,7 +15,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <algorithm>
+
 
 //Allow Windows to use 8/16/32 byte values
 #if defined(_WIN32)
@@ -33,15 +33,16 @@ public:
     WarArchive();
     ~WarArchive();
     void LoadArchive(const std::string &filePath);
-    void LoadArchive(std::vector<char> *loadedFile);
-    void ExtractEntity(std::string outFilePath, unsigned int entityNumber);
+    void ExtractEntity(const std::string &outFilePath, unsigned int entityNumber);
     std::vector<uint8_t> *ExtractEntity(unsigned int entityNumber);
     void CloseArchive();
+    int GetNumberOfEntities();
     
     
 protected:
     void CleanArchive();
     
+    //The filestream open to the archive itself
     std::ifstream *currentArchiveFileStream;
     
     //How far over the archive should we skip before reading
@@ -51,8 +52,6 @@ protected:
     //War archive header information
     uint16_t numberOfEntities;
     uint32_t magicNumber;
-    
-    //Unknown objects
     uint16_t type;
 private:
     

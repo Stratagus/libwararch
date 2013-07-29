@@ -1,19 +1,24 @@
 #include "Archive.hpp"
-#include <iostream>
+#if VERBOSE
+    #include <iostream>
+#endif
 
 WarArchive::WarArchive()
 {
     currentArchiveFileStream = NULL;
+    fileOffsets = NULL;
 }
 
 WarArchive::~WarArchive()
 {
-
+    CleanArchive();
 }
 void WarArchive::LoadArchive(const std::string &filePath)
 {
     CleanArchive();
-    
+    #if VERBOSE >= 2
+        std::cout << "Opening file " << filePath << '\n';
+    #endif
     currentArchiveFileStream = new std::ifstream;
     
     currentArchiveFileStream->open(filePath.c_str(), std::ios::binary);
@@ -25,6 +30,10 @@ void WarArchive::LoadArchive(const std::string &filePath)
     currentArchiveFileStream->read((char *) &numberOfEntities, 2);
     //Read in the types
     currentArchiveFileStream->read((char *) &type, 2);
+
+    #if VERBOSE >= 3
+        std::cout << "Magic Number: " << magicNumber << " Number of Entities: " << numberOfEntities << " Type: " << type << '\n';
+    #endif
     
     if(!fileOffsets)
     {
@@ -36,31 +45,33 @@ void WarArchive::LoadArchive(const std::string &filePath)
     for(int currentGetFileOffset = 0; currentGetFileOffset < numberOfEntities; currentGetFileOffset++)
     {
         currentArchiveFileStream->read((char *) &fileOffsets->at(currentGetFileOffset), 4);
+        #if VERBOSE >= 5
+                std::cout << "File #" << currentGetFileOffset << "  has data Offset: " << fileOffsets->at(currentGetFileOffset) << '\n';
+        #endif
     }
     
 }
 
-void WarArchive::LoadArchive(std::vector<char> *loadedFile)
+int WarArchive::GetNumberOfEntities()
 {
-    /*CleanArchive();
-    std::vector<char>::iterator currentDataPosition = loadedFile->begin();
-    
-    std::copy(currentDataPosition, (currentDataPosition += 4), &magicNumber);
-    std::copy(currentDataPosition, (currentDataPosition += 2), &numberOfEntities);
-    std::copy(currentDataPosition, (currentDataPosition += 2), &type);
-    
-    fileOffsets->resize(numberOfEntities);
-    
-    for(int currentOffsetLoad = 0; currentOffsetLoad < numberOfEntities; currentOffsetLoad++)
+    if(!currentArchiveFileStream)
     {
-        std::copy(currentDataPosition, (currentDataPosition +=4), fileOffsets->at(currentOffsetLoad));
-    }*/
-    
-    //war->op[i] = war->data + war->filesize;
+        NoArchiveLoadedException noArchiveLoaded;
+        noArchiveLoaded.SetErrorMessage("No archive loaded");
+        throw noArchiveLoaded;
+    }
+    #if VERBOSE >= 5
+        std::cout << "Number of Entities: " << numberOfEntities << '\n';
+    #endif
+    return numberOfEntities;
 }
 
 std::vector<uint8_t> *WarArchive::ExtractEntity(unsigned int entityNumber)
 {
+    #if VERBOSE >= 1
+        std::cout << "Extracting Entity #" << entityNumber << '\n';
+    #endif
+    
     if (!currentArchiveFileStream)
     {
         NoArchiveLoadedException noArchive;
@@ -88,10 +99,17 @@ std::vector<uint8_t> *WarArchive::ExtractEntity(unsigned int entityNumber)
     //Mask for the actual uncompressed file size
     unCompressedFileLength &= 0x00FFFFFF;
     
+    #if VERBOSE >= 3
+        std::cout << "Entity #" << entityNumber << " has offset: " << fileOffsets->at(entityNumber) << " uncompressed Size: " << unCompressedFileLength << '\n';
+    #endif
+    
+    #if VERBOSE >= 5
+        std::cout << "Allocating unCompressedFile data size: " << unCompressedFileLength << '\n';
+    #endif
     //Create the vector to hold the resulting data
     std::vector<uint8_t> *unCompressedFile = new std::vector<uint8_t>(unCompressedFileLength);
     
-    //If the data is compressed
+    //If the data is compressed decompress via LZSS
     if(compressionFlags == 0x20)
     {
         //Create a vector iterator to hold where data is to be written to
@@ -111,6 +129,10 @@ std::vector<uint8_t> *WarArchive::ExtractEntity(unsigned int entityNumber)
             uint8_t byteFlags;
             currentArchiveFileStream->read((char *) &byteFlags, 1);
             
+            #if VERBOSE >= 5
+                std::cout << "Read byteFlags: " << byteFlags << '\n';
+            #endif
+            
             for(int currentProcessingBit = 0; currentProcessingBit < 8; ++currentProcessingBit)
             {
                 //Variable holding the raw data.
@@ -121,6 +143,9 @@ std::vector<uint8_t> *WarArchive::ExtractEntity(unsigned int entityNumber)
                 if(byteFlags & 1)
                 {
                     currentArchiveFileStream->read((char *) &dataByte, 1);
+                    #if VERBOSE >= 5
+                        std::cout << "Writing at Position: " << currentWritePosition << " dataByte: " << (int) dataByte << '\n';
+                    #endif
                     unCompressedFile->at(currentWritePosition) = dataByte;
                     currentWritePosition++;
                     byteIndex &= 0xFFF;
@@ -138,6 +163,9 @@ std::vector<uint8_t> *WarArchive::ExtractEntity(unsigned int entityNumber)
                     {
                         repeatByte &= 0xFFF;
                         byteIndex &= 0xFFF;
+                        #if VERBOSE >= 5
+                            std::cout << "Writing at Position: " << currentWritePosition << " dataByte: " << (int) lookAheadBuffer.at(repeatByte) << '\n';
+                        #endif
                         unCompressedFile->at(currentWritePosition) = lookAheadBuffer.at(repeatByte);
                         currentWritePosition++;
                         lookAheadBuffer.at(byteIndex) =  (lookAheadBuffer.at(repeatByte));
@@ -159,7 +187,7 @@ std::vector<uint8_t> *WarArchive::ExtractEntity(unsigned int entityNumber)
             }
         }
     }
-    //If the data is uncompressed
+    //If the data is no compressed, do a straight copy
     else if(compressionFlags == 0x00)
     {
         currentArchiveFileStream->read((char *) &unCompressedFile->front(), unCompressedFileLength);
@@ -175,10 +203,14 @@ std::vector<uint8_t> *WarArchive::ExtractEntity(unsigned int entityNumber)
     return unCompressedFile;
 }
 
-void WarArchive::ExtractEntity(std::string outFilePath, unsigned int entityNumber)
+void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int entityNumber)
 {
     std::vector<uint8_t> *unCompressedFile = NULL;
     unCompressedFile = ExtractEntity(entityNumber);
+    
+    #if VERBOSE >= 3
+        std::cout << "Opening output filepath: " << outFilePath << '\n';
+    #endif  
     
     //Open an output file
     std::ofstream outFile;
@@ -196,6 +228,9 @@ void ExtractEntity(std::vector<char> *uncompressedFile, unsigned int entityNumbe
 
 void WarArchive::CloseArchive()
 {
+    #if VERBOSE >= 5
+        std::cout << "Deleting currentArchiveFileStream\n";
+    #endif
     if(currentArchiveFileStream)
     {
         if(currentArchiveFileStream->is_open())
@@ -210,8 +245,12 @@ void WarArchive::CloseArchive()
 void WarArchive::CleanArchive()
 {
     CloseArchive();
+    #if VERBOSE >= 5
+        std::cout << "Deleting vector fileOffsets\n";
+    #endif
     if(fileOffsets)
     {
+        fileOffsets->resize(0);
         delete fileOffsets;
         fileOffsets = NULL;
     }

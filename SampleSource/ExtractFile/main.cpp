@@ -1,36 +1,30 @@
+#include "main.hpp"
 #include "../../Source/libwararch.hpp"
-
-void LoadFileToVectorImageGRP(std::string filePath, std::vector<char> *destinationVector)
-{
-    std::fstream inputFile(filePath.c_str());
-    
-    inputFile.exceptions(
-                         std::ifstream::badbit
-                         | std::ifstream::failbit
-                         | std::ifstream::eofbit);
-    
-    inputFile.seekg(0, std::ios::end);
-    
-    std::streampos length(inputFile.tellg());
-    
-    if (length)
-    {
-        inputFile.seekg(0, std::ios::beg);
-        destinationVector->resize(static_cast<std::size_t>(length));
-        inputFile.read((char *)&destinationVector->front(), static_cast<std::size_t>(length));
-    }
-}
 
 int main()
 {
+    //Create a WarArchive data structure
     WarArchive myArchive;
+    
+    //Load a war archive (In my case the Warcraft 1 file DATA.WAR)
     myArchive.LoadArchive("/Users/brad/Desktop/war1/DATA/DATA.WAR");
-    myArchive.ExtractEntity("out.wav", 472);
-    myArchive.CloseArchive();
+    
+    //The entity is extracted and directly written to disk
+    myArchive.ExtractEntity("out.wav", 473);
+    
+    //A vector with the uncompressed file can also be extracted
+    //for further processing
+    std::vector<uint8_t> *doorOpenSoundData;
+    doorOpenSoundData = myArchive.ExtractEntity(473);
 
-    //std::vector<char> *imageData = new std::vector<char>;
-    //LoadFileToVectorImageGRP("/Users/brad/Desktop/war1/DATA/DATA.WAR", imageData);
-    //myArchive.LoadArchive(imageData);
+    //Clean up our vector of uncompressed data
+    //Since we are not doing any more processing with it
+    doorOpenSoundData->resize(0);
+    delete doorOpenSoundData;
+    doorOpenSoundData = NULL;
+    
+    //Close the WAR archive and delete internal data structures
+    myArchive.CloseArchive();
     
     return 0;
 }
