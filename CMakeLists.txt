@@ -4,7 +4,7 @@ project(wararch)
 cmake_minimum_required(VERSION 2.6)
 
 #Set the current version of the library
-set(LIBWARARCH_MAJOR_VERSION 0)
+set(LIBWARARCH_MAJOR_VERSION 1)
 set(LIBWARARCH_MINOR_VERSION 0)
 set(LIBWARARCH_PATCH_VERSION 0)
 
