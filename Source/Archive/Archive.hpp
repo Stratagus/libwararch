@@ -35,6 +35,7 @@ public:
     void LoadArchive(const std::string &filePath);
     void LoadArchive(std::vector<char> *loadedFile);
     void ExtractEntity(std::string outFilePath, unsigned int entityNumber);
+    std::vector<uint8_t> *ExtractEntity(unsigned int entityNumber);
     void CloseArchive();
     
     

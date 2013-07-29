@@ -59,127 +59,135 @@ void WarArchive::LoadArchive(std::vector<char> *loadedFile)
     //war->op[i] = war->data + war->filesize;
 }
 
-void WarArchive::ExtractEntity(std::string outFilePath, unsigned int entityNumber)
+std::vector<uint8_t> *WarArchive::ExtractEntity(unsigned int entityNumber)
 {
+    if (!currentArchiveFileStream)
+    {
+        NoArchiveLoadedException noArchive;
+        noArchive.SetErrorMessage("No archive has been loaded");
+        throw noArchive;
+    }
     if(entityNumber > numberOfEntities)
     {
-        //throw out of bounds error
-        throw "bad";
-#warning throw here
+        EntityNumberOutofBoundsException outOfBounds;
+        outOfBounds.SetErrorMessage("Entity extraction value out of bounds");
+        outOfBounds.badEntity = entityNumber;
     }
+    
+    //Seek to the correct file offset to begin reading
+    currentArchiveFileStream->seekg(fileOffsets->at(entityNumber));
+    
+    //Get the Uncompressed file length data and compression flag data
+    uint32_t unCompressedFileLength;
+    currentArchiveFileStream->read((char *) &unCompressedFileLength, 4);
+    
+    //Get the top eight bits to find out the compression flags (Find if the file is compressed
+    uint8_t compressionFlags;
+    compressionFlags = (unCompressedFileLength >> 24);
+    
+    //Mask for the actual uncompressed file size
+    unCompressedFileLength &= 0x00FFFFFF;
+    
+    //Create the vector to hold the resulting data
+    std::vector<uint8_t> *unCompressedFile = new std::vector<uint8_t>(unCompressedFileLength);
+    
+    //If the data is compressed
+    if(compressionFlags == 0x20)
+    {
+        //Create a vector iterator to hold where data is to be written to
+        //std::vector<uint8_t>::iterator unCompressedFilePosition(unCompressedFile->begin());
+        
+        //Create the lookup table for LZSS
+        std::vector<uint8_t> lookAheadBuffer(4096);
+        //std::vector<uint8_t>::iterator lookAheadBufferPosition(lookAheadBuffer.begin());
+        
+        //Current position in the lookAheadTables
+        int byteIndex = 0;
+        unsigned int currentWritePosition = 0;
+        
+        for(int currentProcessingByte = 0; currentProcessingByte < unCompressedFileLength; currentProcessingByte++)
+        {
+            //The type of data in a specific byte
+            uint8_t byteFlags;
+            currentArchiveFileStream->read((char *) &byteFlags, 1);
+            
+            for(int currentProcessingBit = 0; currentProcessingBit < 8; ++currentProcessingBit)
+            {
+                //Variable holding the raw data.
+                uint8_t dataByte;
+                //Repeat byte with data
+                uint16_t repeatByte;
+                
+                if(byteFlags & 1)
+                {
+                    currentArchiveFileStream->read((char *) &dataByte, 1);
+                    unCompressedFile->at(currentWritePosition) = dataByte;
+                    currentWritePosition++;
+                    byteIndex &= 0xFFF;
+                    lookAheadBuffer[byteIndex] = dataByte;
+                    byteIndex++;
+                    currentProcessingByte++;
+                }
+                else
+                {
+                    currentArchiveFileStream->read((char *) &repeatByte, 2);
+                    dataByte = (repeatByte >> 12) + 3;
+                    repeatByte &= 0xFFF;
+                    
+                    while (dataByte--)
+                    {
+                        repeatByte &= 0xFFF;
+                        byteIndex &= 0xFFF;
+                        unCompressedFile->at(currentWritePosition) = lookAheadBuffer.at(repeatByte);
+                        currentWritePosition++;
+                        lookAheadBuffer.at(byteIndex) =  (lookAheadBuffer.at(repeatByte));
+                        repeatByte++;
+                        byteIndex++;
+                        
+                        currentProcessingByte++;
+                        if(currentProcessingByte  == unCompressedFileLength)
+                        {
+                            break;
+                        }
+                    }
+                }
+                if(currentProcessingByte == unCompressedFileLength)
+                {
+                    break;
+                }
+                byteFlags >>= 1;
+            }
+        }
+    }
+    //If the data is uncompressed
+    else if(compressionFlags == 0x00)
+    {
+        currentArchiveFileStream->read((char *) &unCompressedFile->front(), unCompressedFileLength);
+    }
+    //Unknown data (error)
+    else
+    {
+        CorruptArchiveException corruptData;
+        corruptData.SetErrorMessage("Archive is not a WAR archive or is corrupt");
+        throw corruptData;
+    }
+    
+    return unCompressedFile;
+}
+
+void WarArchive::ExtractEntity(std::string outFilePath, unsigned int entityNumber)
+{
+    std::vector<uint8_t> *unCompressedFile = NULL;
+    unCompressedFile = ExtractEntity(entityNumber);
     
     //Open an output file
     std::ofstream outFile;
     outFile.open(outFilePath.c_str(), std::ios::binary);
     outFile.exceptions(std::ofstream::failbit);
     
-    
-    //unknown
-    unsigned int flags;
-    
-    
-    currentArchiveFileStream->seekg(fileOffsets->at(entityNumber));
-    
-    unsigned int unCompressedFileLength;
-    currentArchiveFileStream->read((char *) &unCompressedFileLength, 4);
-    
-    flags = (unCompressedFileLength >> 24);
-    unCompressedFileLength &= 0x00FFFFFF;
-    
-    std::vector<uint8_t> buffer;
-    //The data is compressed
-    if(flags == 0x20)
-    {
-        
-        
-        //Arbitary?
-        buffer.resize(4096);
-        
-        int byteIndex = 0;
-        
-        
-        for(int bytesProcessed= 0; bytesProcessed < unCompressedFileLength; bytesProcessed++)
-        {
-            uint8_t bflags;
-            //std::cout << "B Flags: " << (int) bflags << " Next value :" << (int) currentArchiveFileStream->peek() << '\n';
-            currentArchiveFileStream->read((char *) &bflags, 1);
-            std::cout << "B Flags: " << (int) bflags << " Next value :" << (int) currentArchiveFileStream->peek() << '\n';
-            
-            for(int i = 0; i < 8; ++i)
-            {
-                uint8_t j;
-                uint16_t o;
-                
-                if(bflags & 1)
-                {
-                    currentArchiveFileStream->read((char *) &j, 1);
-                    std::cout << "J: " << (int) j << '\n';
-                    std::cout << "Going to write: " << (char) j << '\n';
-                    outFile.write((char *) &j, 1);
-                    byteIndex &= 0xFFF;
-                    buffer[byteIndex] = j;
-                    byteIndex++;
-                    bytesProcessed++;
-                    //std::cout << "Changed value of buffer to: " << (int) buffer[byteIndex & 0xFFF] << '\n';
-                    
-                }
-                else
-                {
-                    currentArchiveFileStream->read((char *) &o, 2);
-                    //std::cout << "O Value: " << (int) o << '\n';
-                    j = (o >> 12) + 3;
-                    std::cout << "J Value: " << (int) j << '\n';
-                    o &= 0xFFF;
-                    while (j--)
-                    {
-
-                        //std::cout << "Accessing: byteindex " << ((byteIndex + 1) & 0xFFF) << " o " << ((o + 1) & 0xFFF)<< " buffer[o & 0xFFF]: " << (int) buffer[(o + 1) & 0xFFF] << '\n';
-                        
-                        //Why does this not work as
-                        
-                        o &= 0xFFF;
-                        byteIndex &= 0xFFF;
-                        outFile.write((char *) &buffer.at(o), 1);
-                        buffer.at(byteIndex) =  (buffer.at(o));
-                        o++;
-                        byteIndex++;
-                        //std::cout << "Going to write: " << buffer.at(byteIndex & 0xFFF) << '\n';
-                        
-                        bytesProcessed++;
-                        if(bytesProcessed  == unCompressedFileLength)
-                        {
-                            break;
-                        }
-                    }
-                }
-                
-                if(bytesProcessed == unCompressedFileLength)
-                {
-                    break;
-                }
-                bflags >>= 1;
-                //std::cout << "Bflags is now: " << (int) bflags << '\n';
-            }
-        }
-        
-    }
-    else if(flags == 0x00)
-    {
-        //Would like to use std::copy
-        uint8_t buffer;
-        for(int processByte = 0; processByte < unCompressedFileLength; processByte++)
-        {
-            currentArchiveFileStream->read((char *) &buffer, 1);
-            outFile.write((char *) &buffer, 1);
-        }
-    }
-    else
-    {
-        throw "problem";
-    }
+    outFile.write((char *) &unCompressedFile->front(), unCompressedFile->size());
     
     outFile.close();
-
 }
 void ExtractEntity(std::vector<char> *uncompressedFile, unsigned int entityNumber)
 {
