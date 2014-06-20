@@ -1,5 +1,5 @@
 #ifndef Archive_Header
-#define Archive_H
+#define Archive_Header
 
 /*!Main Archive Datastructure
  *  \brief Controls the file operation of a WAR archive
