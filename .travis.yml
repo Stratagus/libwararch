@@ -23,4 +23,4 @@ before_script:
 script: make
 
 after_success:
-  - echo "Add Automated Unit Test!!"
+  - echo "Add Automated Unit Test!!!"
