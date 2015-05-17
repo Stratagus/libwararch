@@ -5,8 +5,8 @@
 
 WarArchive::WarArchive()
 {
-    currentArchiveFileStream = NULL;
-    fileOffsets = NULL;
+    currentArchiveFileStream = nullptr;
+    fileOffsets = nullptr;
 }
 
 WarArchive::~WarArchive()
@@ -205,7 +205,7 @@ std::vector<uint8_t> *WarArchive::ExtractEntity(unsigned int entityNumber)
 
 void WarArchive::ExtractEntity(const std::string &outFilePath, unsigned int entityNumber)
 {
-    std::vector<uint8_t> *unCompressedFile = NULL;
+    std::vector<uint8_t> *unCompressedFile = nullptr;
     unCompressedFile = ExtractEntity(entityNumber);
     
     #if VERBOSE >= 3
@@ -234,7 +234,7 @@ void WarArchive::CloseArchive()
             currentArchiveFileStream->close();
         }
         delete currentArchiveFileStream;
-        currentArchiveFileStream = NULL;
+        currentArchiveFileStream = nullptr;
     }
 }
 
@@ -248,6 +248,6 @@ void WarArchive::CleanArchive()
     {
         fileOffsets->resize(0);
         delete fileOffsets;
-        fileOffsets = NULL;
+        fileOffsets = nullptr;
     }
 }

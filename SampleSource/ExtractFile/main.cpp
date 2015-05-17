@@ -21,7 +21,7 @@ int main()
     //Since we are not doing any more processing with it
     doorOpenSoundData->resize(0);
     delete doorOpenSoundData;
-    doorOpenSoundData = NULL;
+    doorOpenSoundData = nullptr;
     
     //Close the WAR archive and delete internal data structures
     myArchive.CleanArchive();
