@@ -1,6 +1,8 @@
 libwararch
 ======
 
+[![Build Status](https://travis-ci.org/Stratagus/libwararch.svg?branch=develop)](https://travis-ci.org/Stratagus/libwararch)
+
 A simple library to extract files from Blizzard's WAR archive format
  
 libwararch Motivation
