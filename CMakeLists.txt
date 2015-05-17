@@ -139,7 +139,7 @@ if(SAMPLECODE)
 endif()
 
 #Tell the developer the current build options
-message("\n\nlibgrp Compile Options\n Unit Tests: ${UNITTESTS} [-DUNITESTS=(off-on)]")
+message("\n\nlibwararch Compile Options\n Unit Tests: ${UNITTESTS} [-DUNITESTS=(off-on)]")
 message(" Verbose Level: ${VERBOSE} [-DVERBOSE=[(1-5)] 1-Min 5-Max")
 if(APPLE)
 message(" Compile Framework: ${MAKEFRAMEWORK} [-DMAKEFRAMEWORK=(off-on)")
