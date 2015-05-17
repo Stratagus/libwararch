@@ -1,5 +1,4 @@
-#ifndef WarArchException_H
-#define WarArchException_H
+#pragma once
 
 #include <exception>
 #include <string>
@@ -31,5 +30,3 @@ protected:
 private:
     
 };
-
-#endif

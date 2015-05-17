@@ -1,5 +1,4 @@
-#ifndef APITEST_Header
-#define APITEST_Header
+#pragma once
 
 #include "../../Source/libwararch.hpp"
 
@@ -11,6 +10,4 @@
 #define SAMPLEARCHIVE "../../Documentation/SampleContent/SampleArchive.war"
 #else
 #define SAMPLEARCHIVE "../Documentation/SampleContent/SamplePalette.pal"
-#endif
-
 #endif

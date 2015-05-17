@@ -1,5 +1,4 @@
-#ifndef Archive_Header
-#define Archive_Header
+#pragma once
 
 /*!Main Archive Datastructure
  *  \brief Controls the file operation of a WAR archive
@@ -117,5 +116,3 @@ protected:
 private:
     
 };
-
-#endif

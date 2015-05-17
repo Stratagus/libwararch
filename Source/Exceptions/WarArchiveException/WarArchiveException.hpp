@@ -1,5 +1,4 @@
-#ifndef ArchiveException_Header
-#define ArchiveException_Header
+#pragma once
 
 #include "../WarArchException.hpp"
 #include <exception>
@@ -14,5 +13,3 @@ class EntityNumberOutofBoundsException : public ArchiveException
 public:
     int badEntity;
 };
-
-#endif

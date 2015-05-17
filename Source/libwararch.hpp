@@ -1,5 +1,4 @@
-#ifndef libwararch_H
-#define libwararch_H
+#pragma once
 /*! \mainpage General Information
  *
  *  libwararch Motivation
@@ -40,6 +39,3 @@
  *      @ https://launchpad.net/~pali
  */
 #include "WarArchive/WarArchive.hpp"
-
-
-#endif

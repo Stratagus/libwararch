@@ -8,13 +8,11 @@
  *  \version   0.0.1
  *  \date      2012 - Present
  */
-#ifndef libwararchTestMain_H
-#define libwararchTestMain_H
+#pragma once
+
 
 //Main boost include
 #include <boost/test/unit_test.hpp>
 
 //Test the following classes
 #include "APITest/APITest.hpp"
-
-#endif
