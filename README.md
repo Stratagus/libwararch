@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Stratagus/libwararch.svg?branch=develop)](https://travis-ci.org/Stratagus/libwararch)
+
 libwararch
 ======
 
